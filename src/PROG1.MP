@@ -2,10 +2,9 @@ PROGRAMME exemple;
 VAR nb;
 DEBUT
     {{commentaires}}
-    ECRIRE('entrez un nombre entier: ');
+    ECRIRE('Entrez un nombre entier: ');
     LIRE(nb);
-    nb := nb*nb;
+    nb := 2*nb;
     ECRIRE();
-    ECRIRE('le double de ce nombre est: ', nb)
-FIN
-.
+    ECRIRE('Le double de ce nombre est: ', nb)
+FIN.

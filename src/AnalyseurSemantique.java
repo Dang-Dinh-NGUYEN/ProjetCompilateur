@@ -46,6 +46,7 @@ public class AnalyseurSemantique {
 
         enreg = new Variable(nom, 0, DERNIERE_ADRESSE_VAR_GLOB);
         tableIdentificateurs.INSERER(nom, enreg);
+        compilateur.interpreteur.MEM_VAR[DERNIERE_ADRESSE_VAR_GLOB] = (Variable) enreg;
         return true;
     }
 

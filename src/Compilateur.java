@@ -28,6 +28,7 @@ public class Compilateur {
 
     AnalyseurLexical analyseurLexical;
     AnalyseurSyntaxique analyseurSyntaxique;
+    Interpreteur interpreteur;
 
     public void ERREUR(int n) throws Exception {
         switch (n) {
@@ -55,11 +56,12 @@ public class Compilateur {
 
     public void INITIALISER() throws IOException {
         NUM_LIGNE = 1;
-        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\TEST1.MP";
+        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\PROG1.MP";
         try {
             bf = new BufferedReader(new FileReader(SOURCE));
             analyseurLexical = new AnalyseurLexical(this);
             analyseurSyntaxique = new AnalyseurSyntaxique(this);
+            interpreteur = new Interpreteur(this);
         } catch (FileNotFoundException e) {
             System.out.println("Le fichier source n'a pas été trouvé");
             System.exit(0);
@@ -82,7 +84,11 @@ public class Compilateur {
         }
          */
         compilateur.analyseurSyntaxique.ANASYNT();
+        //System.out.println(compilateur.interpreteur.getAnalyseurSemantique());
         compilateur.TERMINER();
+        compilateur.interpreteur.CREER_FICHIER_CODE(compilateur.SOURCE);
+        compilateur.interpreteur.AFFICHER_CODE_GEN();
+
     }
 }
 

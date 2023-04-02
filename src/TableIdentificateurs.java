@@ -26,8 +26,10 @@ class TableIdentificateurs {
         System.out.println("Nom | Genre | typ");
         for (String i : identTab.keySet()) {
             System.out.print(i + " | " + identTab.get(i).toString() + " | ");
-            if(identTab.get(i) instanceof Variable)
-                System.out.println(((Variable) identTab.get(i)).getTypv());
+            if(identTab.get(i) instanceof Variable) {
+                System.out.print(((Variable) identTab.get(i)).getTypv() + " Adresse: ");
+                System.out.println(((Variable) identTab.get(i)).getAdrv());
+            }
             if(identTab.get(i) instanceof Constante)
                 System.out.println(((Constante) identTab.get(i)).getTypc());
         }

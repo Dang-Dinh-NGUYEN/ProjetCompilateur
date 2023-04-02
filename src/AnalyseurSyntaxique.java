@@ -4,11 +4,16 @@ public class AnalyseurSyntaxique {
     private Compilateur compilateur;
     private AnalyseurLexical analyseurLexical;
     private AnalyseurSemantique analyseurSemantique;
+    //private Interpreteur interpreteur;
 
     public AnalyseurSyntaxique(Compilateur compilateur){
         this.compilateur = compilateur;
         analyseurLexical = this.compilateur.analyseurLexical;
         analyseurSemantique = new AnalyseurSemantique(compilateur,this);
+    }
+
+    public AnalyseurSemantique getAnalyseurSemantique(){
+        return this.analyseurSemantique;
     }
 
     public boolean PROG() throws Exception {
@@ -25,7 +30,10 @@ public class AnalyseurSyntaxique {
                         UNILEX = analyseurLexical.ANALEX();
                     if (BLOC()) {
                         UNILEX = analyseurLexical.ANALEX();
-                        if (UNILEX == T_UNILEX.point) return true;
+                        if (UNILEX == T_UNILEX.point){
+                            compilateur.interpreteur.GENCODE_STOP();
+                            return true;
+                        }
                         compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de déclaration d'un PROG: '.' attendu";
                         compilateur.ERREUR(5);
                     }
@@ -160,7 +168,7 @@ public class AnalyseurSyntaxique {
     }
 
     public boolean BLOC() throws Exception {
-        System.out.println("ANALYSE BLOC...");
+        System.out.println(Compilateur.ANSI_PURPLE + "ANALYSE BLOC..." + Compilateur.ANSI_RESET);
         boolean fin;
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("DEBUT")) {
             UNILEX = analyseurLexical.ANALEX();
@@ -194,21 +202,22 @@ public class AnalyseurSyntaxique {
     }
 
     public boolean INSTRUCTION() throws Exception {
-        System.out.println("ANALYSE D'INSTRUCTION...");
+        System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION..." + Compilateur.ANSI_RESET);
         return AFFECTATION() || LECTURE() || ECRITURE() || BLOC();
     }
 
     public boolean AFFECTATION() throws Exception {
-        System.out.println("ANALYSE D'AFFECTATION...");
+        System.out.println(Compilateur.ANSI_CYAN + "ANALYSE D'AFFECTATION..." + Compilateur.ANSI_RESET);
         if (UNILEX == T_UNILEX.ident) {
-            if (analyseurSemantique.IDENT_EXIST()) { //vérifier si la variable a été déclaré
+            //vérifier si la variable a été déclaré
+            if (analyseurSemantique.IDENT_EXIST()) {
                 analyseurSemantique.AFF_VERIFICATION();
-                //Interpreteur.GENCODE_AFFECTATION_IDENT(analyseurLexical.CHAINE);
+                compilateur.interpreteur.GENCODE_AFFECTATION_IDENT(compilateur.CHAINE);
                 UNILEX = analyseurLexical.ANALEX();
                 if (UNILEX == T_UNILEX.aff) {
                     UNILEX = analyseurLexical.ANALEX();
                     if(EXP()){
-                        //Interpreteur.GENCODE_AFFECTATION_AFFE();
+                        compilateur.interpreteur.GENCODE_AFFECTATION_AFFE();
                         System.out.println();
                         return true;
                     }
@@ -230,7 +239,7 @@ public class AnalyseurSyntaxique {
     }
 
     public boolean LECTURE() throws Exception {
-        System.out.println("ANALYSE LECTURE...");
+        System.out.println(Compilateur.ANSI_CYAN + "ANALYSE LECTURE..." + Compilateur.ANSI_RESET);
         boolean fin;
         boolean erreur = false;
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("LIRE")) {
@@ -239,7 +248,7 @@ public class AnalyseurSyntaxique {
                 UNILEX = analyseurLexical.ANALEX();
                 if (UNILEX == T_UNILEX.ident) {
                     if(analyseurSemantique.IDENT_EXIST()) {
-                        //Interpreteur.GENCODE_LECTURE(analyseurLexical.CHAINE);
+                        compilateur.interpreteur.GENCODE_LECTURE(compilateur.CHAINE);
                         UNILEX = analyseurLexical.ANALEX();
                         fin = false;
                         erreur = false;
@@ -248,7 +257,7 @@ public class AnalyseurSyntaxique {
                                 UNILEX = analyseurLexical.ANALEX();
                                 if (UNILEX == T_UNILEX.ident) {
                                     if(analyseurSemantique.IDENT_EXIST()) {
-                                        //Interpreteur.GENCODE_LECTURE(analyseurLexical.CHAINE);
+                                        compilateur.interpreteur.GENCODE_LECTURE(compilateur.CHAINE);
                                         UNILEX = analyseurLexical.ANALEX();
                                     } else {
                                         fin = true;
@@ -288,7 +297,7 @@ public class AnalyseurSyntaxique {
     }
 
     public boolean ECRITURE() throws Exception {
-        System.out.println("ANALYSE ECRITURE...");
+        System.out.println(Compilateur.ANSI_CYAN + "ANALYSE ECRITURE..." + Compilateur.ANSI_RESET);
         boolean fin;
         boolean erreur;
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("ECRIRE")) {
@@ -309,7 +318,7 @@ public class AnalyseurSyntaxique {
                         }
                     }
                 } else {
-                    //Interpreteur.GENCODE_ECRL();
+                    compilateur.interpreteur.GENCODE_ECRL();
                 }
                 if (erreur) {
                     compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: ECR_EXP non-valable";
@@ -321,11 +330,10 @@ public class AnalyseurSyntaxique {
                     return true;
                 }
                 compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: ')' attendu";
-                compilateur.ERREUR(5);
             } else {
                 compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: '(' attendu";
-                compilateur.ERREUR(5);
             }
+            compilateur.ERREUR(5);
         }
         compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: mot-clé 'ECRIRE' attendu";
         return false;
@@ -334,11 +342,11 @@ public class AnalyseurSyntaxique {
     public boolean ECR_EXP() throws Exception {
         System.out.println("ANALYSE ECR_EXP...");
         if (EXP()) {
-            //Interpreteur.GENCODE_ECRE();
+            compilateur.interpreteur.GENCODE_ECR_EXP();
             return true;
         }
         if (UNILEX == T_UNILEX.ch){
-            //Interpreteur.GENCODE_ECRC(analyseurLexical.CHAINE);
+            compilateur.interpreteur.GENCODE_ECRC(compilateur.CHAINE);
             return true;
         }
         return false;
@@ -356,6 +364,7 @@ public class AnalyseurSyntaxique {
         System.out.println("ANALYSE SUITE_TERME...");
         if (OP_BIN()) {
             if(EXP()) {
+                compilateur.interpreteur.GENCODE_EXP_FIN();
                 return true;
             }
             compilateur.ERREUR(5);
@@ -366,13 +375,13 @@ public class AnalyseurSyntaxique {
     public boolean TERME() throws Exception {
         System.out.println("ANALYSE TERME...");
         if (UNILEX == T_UNILEX.ent) {
-            //Interpreteur.GENCODE_TERME_ENT();
+            compilateur.interpreteur.GENCODE_TERME_ENT();
             UNILEX = analyseurLexical.ANALEX();
             return true;
         } else if (UNILEX == T_UNILEX.ident) {
             if (analyseurSemantique.IDENT_EXIST()) {
                 analyseurSemantique.TERME_VERIFICATION();
-                //Interpreteur.GENCODE_TERME_IDENT(analyseurLexical.CHAINE);
+                compilateur.interpreteur.GENCODE_TERME_IDENT(compilateur.CHAINE);
                 UNILEX = analyseurLexical.ANALEX();
                 return true;
             } else {
@@ -393,9 +402,13 @@ public class AnalyseurSyntaxique {
             compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'un TERME: ')' attendu";
             compilateur.ERREUR(5);
         } else if (UNILEX == T_UNILEX.moins) {
-            //Interpreteur.GENCODE_TERME_MOIN();
             UNILEX = analyseurLexical.ANALEX();
-            return TERME();
+            if(TERME()){
+                compilateur.interpreteur.GENCODE_TERME_MOIN();
+                return true;
+            }else{
+                return false;
+            }
         }
         compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'un TERME: TERME attendu";
         return false;
@@ -404,7 +417,7 @@ public class AnalyseurSyntaxique {
     public boolean OP_BIN() throws Exception {
         System.out.println("ANALYSE OP_BIN...");
         if (UNILEX == T_UNILEX.plus || UNILEX == T_UNILEX.moins || UNILEX == T_UNILEX.mult || UNILEX == T_UNILEX.divi) {
-            //Interpreteur.GENCODE_OP_BIN((char) analyseurLexical.CARLU);
+            compilateur.interpreteur.GENCODE_OP_BIN(UNILEX);
             UNILEX = analyseurLexical.ANALEX();
             return true;
         }
