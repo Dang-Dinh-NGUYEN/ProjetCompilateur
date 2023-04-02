@@ -129,13 +129,13 @@ public class AnalyseurSyntaxique {
                 nom_variable = compilateur.CHAINE;
                 UNILEX = analyseurLexical.ANALEX();
                 fin = false;
-                if (analyseurSemantique.DEFINIR_VAR(nom_variable, UNILEX)) {
+                if (analyseurSemantique.DEFINIR_VAR(nom_variable)) {
                     while (!fin) {
                         if (UNILEX == T_UNILEX.virg) {
                             UNILEX = analyseurLexical.ANALEX();
                             if (UNILEX == T_UNILEX.ident) {
                                 nom_variable = compilateur.CHAINE;
-                                if (analyseurSemantique.DEFINIR_VAR(nom_variable, UNILEX)) {
+                                if (analyseurSemantique.DEFINIR_VAR(nom_variable)) {
                                     UNILEX = analyseurLexical.ANALEX();
                                 } else {
                                     fin = true;
@@ -205,6 +205,15 @@ public class AnalyseurSyntaxique {
         System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION..." + Compilateur.ANSI_RESET);
         return AFFECTATION() || LECTURE() || ECRITURE() || BLOC();
     }
+
+    //public boolean INST_NON_COND() throws Exception {
+        //System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION NON CONDITION..." + Compilateur.ANSI_RESET);
+        //return AFFECTATION() || LECTURE() || ECRITURE() || BLOC() || INST_REPE();
+    //}
+
+    //public boolean INST_COND(){}
+
+    //public boolean INST_REPE(){}
 
     public boolean AFFECTATION() throws Exception {
         System.out.println(Compilateur.ANSI_CYAN + "ANALYSE D'AFFECTATION..." + Compilateur.ANSI_RESET);

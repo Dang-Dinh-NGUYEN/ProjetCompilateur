@@ -33,20 +33,19 @@ public class AnalyseurSemantique {
         return true;
     }
 
-    public boolean DEFINIR_VAR (String nom, T_UNILEX ul) throws Exception {
+    public boolean DEFINIR_VAR (String nom) throws Exception {
         T_ENREG_IDENT enreg;
 
         if (tableIdentificateurs.CHERCHER(nom)) {
             compilateur.MESSAGE_ERREUR = "erreur sémantique dans une instruction de DEFINIR_VAR: identificateur existe déjà";
             compilateur.ERREUR(5);
         }
-        System.out.println(analyseurLexical);
-        System.out.println(analyseurSyntaxique);
         DERNIERE_ADRESSE_VAR_GLOB = DERNIERE_ADRESSE_VAR_GLOB + 1;
 
         enreg = new Variable(nom, 0, DERNIERE_ADRESSE_VAR_GLOB);
         tableIdentificateurs.INSERER(nom, enreg);
-        compilateur.interpreteur.MEM_VAR[DERNIERE_ADRESSE_VAR_GLOB] = (Variable) enreg;
+        //A verifier
+        compilateur.interpreteur.MEM_VAR[DERNIERE_ADRESSE_VAR_GLOB] = 0;
         return true;
     }
 

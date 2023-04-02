@@ -33,5 +33,6 @@ class TableIdentificateurs {
             if(identTab.get(i) instanceof Constante)
                 System.out.println(((Constante) identTab.get(i)).getTypc());
         }
+        System.out.println();
     }
 }

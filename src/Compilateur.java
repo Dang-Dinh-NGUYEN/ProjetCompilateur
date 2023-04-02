@@ -4,17 +4,15 @@ import java.nio.charset.StandardCharsets;
 public class Compilateur {
     public static final int LONG_MAX_IDENT = 20;
     public static final int LONG_MAX_CHAINE = 50;
-    public static final int NB_MOTS_RESERVES = 7;
+    public static final int NB_MOTS_RESERVES = 12;
     public static final int MAXINT = 32767;
 
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
     public static final String ANSI_BLUE = "\u001B[34m";
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
 
     String SOURCE;
     int CARLU;
@@ -51,12 +49,15 @@ public class Compilateur {
                 System.out.println(ANSI_RED + "\nERREUR SYNTAXIQUE _ ligne n°" + NUM_LIGNE + ":\n" + MESSAGE_ERREUR + ANSI_RESET);
                 System.exit(0);
                 break;
+            case 6:
+                System.out.println(ANSI_RED + MESSAGE_ERREUR + ANSI_RESET);
+                break;
         }
     }
 
     public void INITIALISER() throws IOException {
         NUM_LIGNE = 1;
-        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\PROG1.MP";
+        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\TEST1.MP";
         try {
             bf = new BufferedReader(new FileReader(SOURCE));
             analyseurLexical = new AnalyseurLexical(this);
@@ -66,7 +67,8 @@ public class Compilateur {
             System.out.println("Le fichier source n'a pas été trouvé");
             System.exit(0);
         }
-        TABLE_MOTS_RESERVES = new String[]{"PROGRAMME", "DEBUT", "FIN", "CONST", "VAR", "ECRIRE", "LIRE"};
+        TABLE_MOTS_RESERVES = new String[]{"PROGRAMME", "DEBUT", "FIN", "CONST",
+                "VAR", "ECRIRE", "LIRE", "SI", "ALORS", "SINON", "TANTQUE", "FAIRE"};
     }
 
     public void TERMINER() throws Exception {
@@ -84,10 +86,9 @@ public class Compilateur {
         }
          */
         compilateur.analyseurSyntaxique.ANASYNT();
-        //System.out.println(compilateur.interpreteur.getAnalyseurSemantique());
         compilateur.TERMINER();
         compilateur.interpreteur.CREER_FICHIER_CODE(compilateur.SOURCE);
-        compilateur.interpreteur.AFFICHER_CODE_GEN();
+        compilateur.interpreteur.INTERPRETER();
 
     }
 }
