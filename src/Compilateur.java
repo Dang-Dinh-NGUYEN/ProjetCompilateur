@@ -24,9 +24,6 @@ public class Compilateur {
     String[] TABLE_MOTS_RESERVES = new String[NB_MOTS_RESERVES];
     String MESSAGE_ERREUR;
 
-    int NB_CONST_CHAINE;
-    String[] VAL_DE_CONST_CHAINE = new String[1000];
-
     BufferedReader bf;
 
     AnalyseurLexical analyseurLexical;
@@ -63,8 +60,6 @@ public class Compilateur {
             bf = new BufferedReader(new FileReader(SOURCE));
             analyseurLexical = new AnalyseurLexical(this);
             analyseurSyntaxique = new AnalyseurSyntaxique(this);
-
-            NB_CONST_CHAINE = 0;
         } catch (FileNotFoundException e) {
             System.out.println("Le fichier source n'a pas été trouvé");
             System.exit(0);
@@ -80,20 +75,14 @@ public class Compilateur {
         Compilateur compilateur = new Compilateur();
         compilateur.INITIALISER();
         compilateur.analyseurLexical.LIRE_CAR();
-
         /*
         while (compilateur.CARLU!=-1) {
             T_UNILEX token = compilateur.analyseurLexical.ANALEX();
             compilateur.analyseurLexical.AFFICHER(token);
         }
-
          */
-
-
         compilateur.analyseurSyntaxique.ANASYNT();
         compilateur.TERMINER();
-
-
     }
 }
 

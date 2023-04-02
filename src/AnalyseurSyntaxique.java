@@ -1,17 +1,14 @@
-import java.util.Stack;
-
 public class AnalyseurSyntaxique {
     T_UNILEX UNILEX;
-    int DERNIERE_ADRESSE_VAR_GLOB = -1;
 
-    private final Compilateur compilateur;
-    AnalyseurLexical analyseurLexical;
-    AnalyseurSemantique analyseurSemantique;
+    private Compilateur compilateur;
+    private AnalyseurLexical analyseurLexical;
+    private AnalyseurSemantique analyseurSemantique;
 
     public AnalyseurSyntaxique(Compilateur compilateur){
         this.compilateur = compilateur;
         analyseurLexical = this.compilateur.analyseurLexical;
-        analyseurSemantique = new AnalyseurSemantique(compilateur);
+        analyseurSemantique = new AnalyseurSemantique(compilateur,this);
     }
 
     public boolean PROG() throws Exception {
@@ -124,13 +121,13 @@ public class AnalyseurSyntaxique {
                 nom_variable = compilateur.CHAINE;
                 UNILEX = analyseurLexical.ANALEX();
                 fin = false;
-                if (DEFINIR_VAR(nom_variable, UNILEX)) {
+                if (analyseurSemantique.DEFINIR_VAR(nom_variable, UNILEX)) {
                     while (!fin) {
                         if (UNILEX == T_UNILEX.virg) {
                             UNILEX = analyseurLexical.ANALEX();
                             if (UNILEX == T_UNILEX.ident) {
                                 nom_variable = compilateur.CHAINE;
-                                if (DEFINIR_VAR(nom_variable, UNILEX)) {
+                                if (analyseurSemantique.DEFINIR_VAR(nom_variable, UNILEX)) {
                                     UNILEX = analyseurLexical.ANALEX();
                                 } else {
                                     fin = true;
@@ -161,21 +158,6 @@ public class AnalyseurSyntaxique {
         compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de DECL_VAR: mot-clé 'VAR' attendu";
         return false;
     }
-
-    public boolean DEFINIR_VAR(String nom, T_UNILEX ul) throws Exception {
-        T_ENREG_IDENT enreg;
-
-        if (analyseurSemantique.tableIdentificateurs.CHERCHER(nom)) {
-            compilateur.MESSAGE_ERREUR = "erreur sémantique dans une instruction de DEFINIR_VAR: identificateur existe déjà";
-            compilateur.ERREUR(5);
-        }
-        DERNIERE_ADRESSE_VAR_GLOB++;
-
-        enreg = new Variable(nom, 0, DERNIERE_ADRESSE_VAR_GLOB);
-        analyseurSemantique.tableIdentificateurs.INSERER(nom, enreg);
-        return true;
-    }
-
 
     public boolean BLOC() throws Exception {
         System.out.println("ANALYSE BLOC...");
@@ -219,15 +201,8 @@ public class AnalyseurSyntaxique {
     public boolean AFFECTATION() throws Exception {
         System.out.println("ANALYSE D'AFFECTATION...");
         if (UNILEX == T_UNILEX.ident) {
-            if (analyseurSemantique.tableIdentificateurs.CHERCHER(compilateur.CHAINE)) { //vérifier si la variable a été déclaré
-                T_ENREG_IDENT id = analyseurSemantique.tableIdentificateurs.getIdentificateur(compilateur.CHAINE);
-                int id_val;
-                if(id instanceof Constante) {
-                    id_val = ((Constante) id).getTypc();
-                    if(id_val != 0)
-                    compilateur.MESSAGE_ERREUR = "erreur sémantique dans une instruction d'AFFECTATION: variable doit être de type entier";
-                    compilateur.ERREUR(5); //Constante de type chaine
-                }
+            if (analyseurSemantique.IDENT_EXIST()) { //vérifier si la variable a été déclaré
+                analyseurSemantique.AFF_VERIFICATION();
                 //Interpreteur.GENCODE_AFFECTATION_IDENT(analyseurLexical.CHAINE);
                 UNILEX = analyseurLexical.ANALEX();
                 if (UNILEX == T_UNILEX.aff) {
@@ -263,7 +238,7 @@ public class AnalyseurSyntaxique {
             if (UNILEX == T_UNILEX.parouv) {
                 UNILEX = analyseurLexical.ANALEX();
                 if (UNILEX == T_UNILEX.ident) {
-                    if(analyseurSemantique.tableIdentificateurs.CHERCHER(compilateur.CHAINE)) {
+                    if(analyseurSemantique.IDENT_EXIST()) {
                         //Interpreteur.GENCODE_LECTURE(analyseurLexical.CHAINE);
                         UNILEX = analyseurLexical.ANALEX();
                         fin = false;
@@ -272,7 +247,7 @@ public class AnalyseurSyntaxique {
                             if (UNILEX == T_UNILEX.virg) {
                                 UNILEX = analyseurLexical.ANALEX();
                                 if (UNILEX == T_UNILEX.ident) {
-                                    if(analyseurSemantique.tableIdentificateurs.CHERCHER(compilateur.CHAINE)) {
+                                    if(analyseurSemantique.IDENT_EXIST()) {
                                         //Interpreteur.GENCODE_LECTURE(analyseurLexical.CHAINE);
                                         UNILEX = analyseurLexical.ANALEX();
                                     } else {
@@ -395,15 +370,8 @@ public class AnalyseurSyntaxique {
             UNILEX = analyseurLexical.ANALEX();
             return true;
         } else if (UNILEX == T_UNILEX.ident) {
-            if (analyseurSemantique.tableIdentificateurs.CHERCHER(compilateur.CHAINE)) {
-                T_ENREG_IDENT id = analyseurSemantique.tableIdentificateurs.getIdentificateur(compilateur.CHAINE);
-                int id_val;
-                if(id instanceof Constante) {
-                    id_val = ((Constante) id).getTypc();
-                    if (id_val != 0)
-                    compilateur.MESSAGE_ERREUR = "erreur sémantique dans une instruction d'un TERME: Variable doit être de type entier";
-                    compilateur.ERREUR(5); //Constante de type chaine
-                }
+            if (analyseurSemantique.IDENT_EXIST()) {
+                analyseurSemantique.TERME_VERIFICATION();
                 //Interpreteur.GENCODE_TERME_IDENT(analyseurLexical.CHAINE);
                 UNILEX = analyseurLexical.ANALEX();
                 return true;
