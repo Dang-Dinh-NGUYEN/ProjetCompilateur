@@ -4,7 +4,6 @@ public class AnalyseurSyntaxique {
     private Compilateur compilateur;
     private AnalyseurLexical analyseurLexical;
     private AnalyseurSemantique analyseurSemantique;
-    //private Interpreteur interpreteur;
 
     public AnalyseurSyntaxique(Compilateur compilateur){
         this.compilateur = compilateur;
@@ -29,7 +28,7 @@ public class AnalyseurSyntaxique {
                     if (DECL_VAR())
                         UNILEX = analyseurLexical.ANALEX();
                     if (BLOC()) {
-                        UNILEX = analyseurLexical.ANALEX();
+                        //UNILEX = analyseurLexical.ANALEX();
                         if (UNILEX == T_UNILEX.point){
                             compilateur.interpreteur.GENCODE_STOP();
                             return true;
@@ -170,6 +169,7 @@ public class AnalyseurSyntaxique {
     public boolean BLOC() throws Exception {
         System.out.println(Compilateur.ANSI_PURPLE + "ANALYSE BLOC..." + Compilateur.ANSI_RESET);
         boolean fin;
+        System.out.println(UNILEX + " " + compilateur.CHAINE);
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("DEBUT")) {
             UNILEX = analyseurLexical.ANALEX();
             if (INSTRUCTION()) {
@@ -185,10 +185,13 @@ public class AnalyseurSyntaxique {
                         fin = true;
                     }
                 }
+                System.out.println(UNILEX + " " + compilateur.CHAINE);
                 if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("FIN")) {
+                    UNILEX = analyseurLexical.ANALEX();
+                    System.out.println(Compilateur.ANSI_PURPLE + "BLOC VALIDE..." + Compilateur.ANSI_RESET);
                     return true;
                 } else {
-                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de BLOC: mot-clé 'FIN' attendu";
+                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de BLOC: mot-clé 'FIN' attendu " + UNILEX;
                     compilateur.ERREUR(5);
                 }
             } else {
@@ -197,23 +200,85 @@ public class AnalyseurSyntaxique {
             }
         }
         compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de BLOC: mot-clé 'DEBUT' attendu";
-        compilateur.ERREUR(5);
         return false;
     }
 
     public boolean INSTRUCTION() throws Exception {
         System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION..." + Compilateur.ANSI_RESET);
-        return AFFECTATION() || LECTURE() || ECRITURE() || BLOC();
+        return INST_NON_COND() || INST_COND();
     }
 
-    //public boolean INST_NON_COND() throws Exception {
-        //System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION NON CONDITION..." + Compilateur.ANSI_RESET);
-        //return AFFECTATION() || LECTURE() || ECRITURE() || BLOC() || INST_REPE();
-    //}
+    public boolean INST_NON_COND() throws Exception {
+        System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION NON CONDITION..." + Compilateur.ANSI_RESET);
+        return AFFECTATION() || LECTURE() || ECRITURE() || BLOC() || INST_REPE();
+    }
 
-    //public boolean INST_COND(){}
+    public boolean INST_COND() throws Exception {
+        System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION AVEC CONDITION..." + Compilateur.ANSI_RESET);
+        if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("SI")){
+            UNILEX = analyseurLexical.ANALEX();
+            if(EXP()){
+                System.out.println(Compilateur.ANSI_RED + UNILEX + " " + compilateur.CHAINE + Compilateur.ANSI_RESET);
+                if(UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("ALORS")){
+                    UNILEX = analyseurLexical.ANALEX();
+                   if (INST_COND()) return true;
+                   if (INST_NON_COND()){
+                       UNILEX = analyseurLexical.ANALEX();
+                       System.out.println(Compilateur.ANSI_RED + UNILEX + " " + compilateur.CHAINE + Compilateur.ANSI_RESET);
+                       boolean fin = false;
+                       while (!fin) {
+                           if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("SINON")) {
+                               UNILEX = analyseurLexical.ANALEX();
+                               if (!INSTRUCTION()){
+                                   compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_COND 2: INSTRUCTION attendu";
+                                   compilateur.ERREUR(5);
+                                   fin = true;
+                               }
+                           } else {
+                               fin = true;
+                           }
+                       }
+                       return true;
+                   }
+                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_COND 1: INSTRUCTION attendu";
+                    compilateur.ERREUR(5);
+                } else {
+                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_COND: mot-clé 'ALORS' attendu";
+                    compilateur.ERREUR(5);
+                }
+            }
+            compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_COND: EXP/CONDITION attendu";
+            compilateur.ERREUR(5);
+        }
+        compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_COND: mot-clé 'SI' attendu";
+        return false;
 
-    //public boolean INST_REPE(){}
+    }
+
+    public boolean INST_REPE() throws Exception {
+        System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION REP..." + Compilateur.ANSI_RESET);
+        if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("TANTQUE")){
+            UNILEX = analyseurLexical.ANALEX();
+            if(EXP()){
+                if(UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("FAIRE")){
+                    UNILEX = analyseurLexical.ANALEX();
+                    System.out.println(UNILEX + " " + compilateur.CHAINE);
+
+                    if(INSTRUCTION()){
+                        System.out.println(Compilateur.ANSI_BLUE + "INSTRUCTION REP VALIDE..." + Compilateur.ANSI_RESET);
+                        return true;
+                    }
+                } else {
+                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_REPE: mot-clé 'FAIRE' attendu " + compilateur.CHAINE ;
+                    compilateur.ERREUR(5);
+                }
+            }
+            compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_REPE: EXP/CONDITION attendu";
+            compilateur.ERREUR(5);
+        }
+        compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_REPE: mot-clé 'TANTQUE' attendu";
+        return false;
+    }
 
     public boolean AFFECTATION() throws Exception {
         System.out.println(Compilateur.ANSI_CYAN + "ANALYSE D'AFFECTATION..." + Compilateur.ANSI_RESET);
@@ -338,7 +403,7 @@ public class AnalyseurSyntaxique {
                     System.out.println();
                     return true;
                 }
-                compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: ')' attendu";
+                compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: ')' attendu " + (char) compilateur.CARLU + " " + UNILEX + " " + compilateur.CHAINE;
             } else {
                 compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction d'ECRITURE: '(' attendu";
             }

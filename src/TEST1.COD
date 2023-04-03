@@ -1,0 +1,17 @@
+1 mot(s) réservé(s) pour les variables globales
+ECRC Entrez un nombre entier:  FINC
+EMPI 0
+LIRE
+EMPI 0
+EMPI 0
+CONT
+EMPI 0
+CONT
+MULT
+AFFE
+ECRL
+ECRC Le carré du nombre est:  FINC
+EMPI 0
+CONT
+ECRE
+STOP

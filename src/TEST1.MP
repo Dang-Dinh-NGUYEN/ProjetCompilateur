@@ -7,5 +7,4 @@ DEBUT
     nb := nb*nb;
     ECRIRE();
     ECRIRE('Le carré du nombre est: ',nb)
-FIN
-.
+FIN.

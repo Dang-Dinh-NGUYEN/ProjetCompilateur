@@ -57,7 +57,7 @@ public class Compilateur {
 
     public void INITIALISER() throws IOException {
         NUM_LIGNE = 1;
-        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\TEST1.MP";
+        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\PROG3.MP";
         try {
             bf = new BufferedReader(new FileReader(SOURCE));
             analyseurLexical = new AnalyseurLexical(this);

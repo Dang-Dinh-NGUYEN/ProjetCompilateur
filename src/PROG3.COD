@@ -1,0 +1,11 @@
+1 mot(s) réservé(s) pour les variables globales
+EMPI 0
+CONT
+ECRC Le résultat est différent de zéro FINC
+ECRL
+ECRC Il est égal à: FINC
+EMPI 0
+CONT
+ECRE
+ECRC Le résultat est null FINC
+STOP
