@@ -15,6 +15,7 @@ public class AnalyseurSyntaxique {
         return this.analyseurSemantique;
     }
 
+    /*A verifier*/
     public boolean PROG() throws Exception {
         System.out.println("ANALYSE PROG...");
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("PROGRAMME")) {
@@ -169,7 +170,6 @@ public class AnalyseurSyntaxique {
     public boolean BLOC() throws Exception {
         System.out.println(Compilateur.ANSI_PURPLE + "ANALYSE BLOC..." + Compilateur.ANSI_RESET);
         boolean fin;
-        System.out.println(UNILEX + " " + compilateur.CHAINE);
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("DEBUT")) {
             UNILEX = analyseurLexical.ANALEX();
             if (INSTRUCTION()) {
@@ -185,13 +185,12 @@ public class AnalyseurSyntaxique {
                         fin = true;
                     }
                 }
-                System.out.println(UNILEX + " " + compilateur.CHAINE);
                 if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("FIN")) {
                     UNILEX = analyseurLexical.ANALEX();
                     System.out.println(Compilateur.ANSI_PURPLE + "BLOC VALIDE..." + Compilateur.ANSI_RESET);
                     return true;
                 } else {
-                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de BLOC: mot-clé 'FIN' attendu " + UNILEX;
+                    compilateur.MESSAGE_ERREUR = "erreur syntaxique dans une instruction de BLOC: mot-clé 'FIN' attendu ";
                     compilateur.ERREUR(5);
                 }
             } else {
@@ -219,10 +218,15 @@ public class AnalyseurSyntaxique {
             UNILEX = analyseurLexical.ANALEX();
             if(EXP()){
                 System.out.println(Compilateur.ANSI_RED + UNILEX + " " + compilateur.CHAINE + Compilateur.ANSI_RESET);
+                compilateur.interpreteur.GENCODE_ALSN();
                 if(UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("ALORS")){
                     UNILEX = analyseurLexical.ANALEX();
-                   if (INST_COND()) return true;
+                   if (INST_COND()) {
+                       compilateur.interpreteur.GENCODE_INST_COND_ALLE();
+                       return true;
+                   }
                    if (INST_NON_COND()){
+                       compilateur.interpreteur.GENCODE_INST_COND_ALLE();
                        UNILEX = analyseurLexical.ANALEX();
                        System.out.println(Compilateur.ANSI_RED + UNILEX + " " + compilateur.CHAINE + Compilateur.ANSI_RESET);
                        boolean fin = false;
@@ -238,6 +242,7 @@ public class AnalyseurSyntaxique {
                                fin = true;
                            }
                        }
+                       compilateur.interpreteur.GENCODE_INST_CONDF();
                        return true;
                    }
                     compilateur.MESSAGE_ERREUR = "erreur syntaxique dans INST_COND 1: INSTRUCTION attendu";
@@ -259,13 +264,15 @@ public class AnalyseurSyntaxique {
         System.out.println(Compilateur.ANSI_BLUE + "ANALYSE D'INSTRUCTION REP..." + Compilateur.ANSI_RESET);
         if (UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("TANTQUE")){
             UNILEX = analyseurLexical.ANALEX();
+            compilateur.interpreteur.GENCODE_INST_REPED();
             if(EXP()){
+                compilateur.interpreteur.GENCODE_ALSN();
                 if(UNILEX == T_UNILEX.motcle && compilateur.CHAINE.equals("FAIRE")){
                     UNILEX = analyseurLexical.ANALEX();
                     System.out.println(UNILEX + " " + compilateur.CHAINE);
-
                     if(INSTRUCTION()){
-                        System.out.println(Compilateur.ANSI_BLUE + "INSTRUCTION REP VALIDE..." + Compilateur.ANSI_RESET);
+                        System.out.println(Compilateur.ANSI_RED + "INSTRUCTION REP VALIDE..." + Compilateur.ANSI_RESET);
+                        compilateur.interpreteur.GENCODE_INST_REPE_ALLE();
                         return true;
                     }
                 } else {
@@ -429,7 +436,9 @@ public class AnalyseurSyntaxique {
     public boolean EXP() throws Exception {
         System.out.println("ANALYSE EXP...");
         if (TERME()) {
-            return SUITE_TERME();
+            if(SUITE_TERME()){
+                return true;
+            }
         }
         return false;
     }

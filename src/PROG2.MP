@@ -4,7 +4,7 @@ DEBUT
     i := 10;
     TANTQUE i FAIRE
     DEBUT
-        ECRIRE('',i);
+        ECRIRE('',i*2);
         i := i - 1
     FIN;
     ECRIRE('0');

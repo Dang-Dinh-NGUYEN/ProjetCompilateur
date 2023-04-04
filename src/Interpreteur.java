@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 public class Interpreteur {
     public static final int TAILLE_MAX_MEM = 10000;
-    //MOT_MEM[] MEM = new MOT_MEM[TAILLE_MAX_MEM]; //la mémoire centrale
 
     Integer[] MEM_VAR = new Integer[TAILLE_MAX_MEM]; //la zone mémoire réservée aux variables globales
     Integer[] P_CODE = new Integer[TAILLE_MAX_MEM]; //la zone mémoire réservée au code machine
@@ -14,7 +13,7 @@ public class Interpreteur {
     int SOM_PILEX = 0; //la sommet de la pile d'exécution
 
     Integer[] PILOP = new Integer[TAILLE_MAX_MEM];
-    int SOM_PILOP = -1;
+    int SOM_PILOP = 0;
     int CO = 0;
 
     private Compilateur compilateur;
@@ -132,6 +131,47 @@ public class Interpreteur {
 
     }
 
+    public void GENCODE_ALSN(){
+        P_CODE[CO] = MOT_MEM.ALSN.ordinal();
+        stringBuilder.append(MOT_MEM.ALSN.name()).append(" ").append('\n');
+        SOM_PILOP = SOM_PILOP + 1;
+        PILOP[SOM_PILOP] = CO + 1;
+        CO = CO + 2;
+    }
+
+    public void GENCODE_INST_COND_ALLE(){
+        P_CODE[PILOP[SOM_PILOP]] = CO + 2;
+        stringBuilder.insert(stringBuilder.indexOf("ALSN ") + "ALSN ".length(), P_CODE[PILOP[SOM_PILOP]]);
+        SOM_PILOP = SOM_PILOP - 1;
+        P_CODE[CO] = MOT_MEM.ALLE.ordinal();
+        stringBuilder.append(MOT_MEM.ALLE.name()).append(" ");
+        SOM_PILOP = SOM_PILOP + 1;
+        PILOP[SOM_PILOP] = CO + 1;
+        CO = CO + 2;
+    }
+
+    public void GENCODE_INST_CONDF(){
+        P_CODE[PILOP[SOM_PILOP]] = CO;
+        stringBuilder.insert(stringBuilder.indexOf("ALLE ") + "ALLE ".length(), P_CODE[PILOP[SOM_PILOP]]);
+        SOM_PILOP = SOM_PILOP - 1;
+    }
+
+    public void GENCODE_INST_REPED(){
+        PILOP[SOM_PILOP] = CO;
+        SOM_PILOP = SOM_PILOP + 1;
+    }
+
+    public void GENCODE_INST_REPE_ALLE(){
+        P_CODE[PILOP[SOM_PILOP]] = CO + 2;
+        SOM_PILOP = SOM_PILOP - 1;
+        P_CODE[CO] = MOT_MEM.ALLE.ordinal();
+        SOM_PILOP = SOM_PILOP - 1;
+        P_CODE[CO + 1] = PILOP[SOM_PILOP];
+        stringBuilder.append(MOT_MEM.ALLE.name()).append(" ").append(P_CODE[CO + 1] ).append('\n');
+        CO = CO + 2;
+        stringBuilder.insert(stringBuilder.indexOf("ALSN ") + "ALSN ".length(), CO);
+    }
+
     public void GENCODE_STOP(){
         P_CODE[CO] = MOT_MEM.STOP.ordinal();
         stringBuilder.append(MOT_MEM.STOP.name());
@@ -140,14 +180,16 @@ public class Interpreteur {
     }
 
     public void AFFICHER_CODE_GEN(){
+        System.out.println("MEM_VAR: ");
         System.out.println(Arrays.toString(MEM_VAR));
         System.out.println("PILOP: ");
         System.out.println(Arrays.toString(PILOP));
         System.out.println("P_CODE: ");
         System.out.println(Arrays.toString(P_CODE));
+        System.out.println("PILEX: ");
+        System.out.println(Arrays.toString(PILEX));
         System.out.println();
-        //System.out.println(stringBuilder.toString());
-
+        System.out.println(stringBuilder.toString());
     }
 
     public void INTERPRETER() throws Exception {
@@ -155,25 +197,21 @@ public class Interpreteur {
         while (P_CODE[CO] != MOT_MEM.STOP.ordinal()){
             switch (P_CODE[CO]) {
                 case 0: //ADDI
-                    //System.out.println(Compilateur.ANSI_YELLOW + "ADDI");
                     PILEX[SOM_PILEX - 1] = PILEX[SOM_PILEX - 1] + PILEX[SOM_PILEX];
                     SOM_PILEX = SOM_PILEX - 1;
                     CO = CO + 1;
                     break;
                 case 1: //SOUS
-                    //System.out.println(Compilateur.ANSI_YELLOW + "SOUS");
                     PILEX[SOM_PILEX - 1] = PILEX[SOM_PILEX - 1] - PILEX[SOM_PILEX];
                     SOM_PILEX = SOM_PILEX - 1;
                     CO = CO + 1;
                     break;
                 case 2: //MULT
-                    //System.out.println(Compilateur.ANSI_YELLOW + "MULT");
                     PILEX[SOM_PILEX - 1] = PILEX[SOM_PILEX - 1] * PILEX[SOM_PILEX];
                     SOM_PILEX = SOM_PILEX - 1;
                     CO = CO + 1;
                     break;
                 case 3: //DIVI
-                    //System.out.println(Compilateur.ANSI_YELLOW + "DIVI");
                     if (PILEX[SOM_PILEX] == 0) {
                         compilateur.MESSAGE_ERREUR = "ERREUR D'EXECUTION: DIVISION PAR ZERO";
                         compilateur.ERREUR(6);
@@ -183,36 +221,30 @@ public class Interpreteur {
                     CO = CO + 1;
                     break;
                 case 4: //MOIN
-                    //System.out.println(Compilateur.ANSI_YELLOW + "MOIN");
                     PILEX[SOM_PILEX] = -PILEX[SOM_PILEX];
                     CO = CO + 1;
                     break;
                 case 5: //AFFE
-                    //System.out.println(Compilateur.ANSI_YELLOW + "AFFE");
                     MEM_VAR[PILEX[SOM_PILEX - 1]] = PILEX[SOM_PILEX];
                     SOM_PILEX = SOM_PILEX - 2;
                     CO = CO + 1;
                     break;
                 case 6: //LIRE
-                    //System.out.println(Compilateur.ANSI_YELLOW + "LIRE");
                     Scanner scanner = new Scanner(System.in);
                     MEM_VAR[PILEX[SOM_PILEX]] = Integer.valueOf(scanner.nextLine());
                     SOM_PILEX = SOM_PILEX - 1;
                     CO = CO + 1;
                     break;
                 case 7: //ECRL
-                    //System.out.println(Compilateur.ANSI_YELLOW + "ECRL");
                     System.out.println();
                     CO = CO + 1;
                     break;
                 case 8: //ECRE
-                    //System.out.println(Compilateur.ANSI_YELLOW + "ECRE");
                     System.out.println(PILEX[SOM_PILEX]);
                     SOM_PILEX = SOM_PILEX - 1;
                     CO = CO + 1;
                     break;
                 case 9: //ECRC
-                    //System.out.println(Compilateur.ANSI_YELLOW + "ECRC");
                     int i = 1;
                     char ch = (char) P_CODE[CO + i].intValue();
                     while (P_CODE[CO + i] != MOT_MEM.FINC.ordinal()) {
@@ -220,26 +252,33 @@ public class Interpreteur {
                         i = i + 1;
                         ch = (char) P_CODE[CO + i].intValue();
                     }
-                    //System.out.println(Compilateur.ANSI_YELLOW + "FINC");
                     CO = CO + i + 1;
                     break;
                 case 11: //EMPI
-                    //System.out.println(Compilateur.ANSI_YELLOW + "EMPI");
                     SOM_PILEX = SOM_PILEX + 1;
                     PILEX[SOM_PILEX] = P_CODE[CO + 1];
                     CO = CO + 2;
                     break;
                 case 12: //CONT
-                    //System.out.println(Compilateur.ANSI_YELLOW + "CONT");
                     PILEX[SOM_PILEX] = MEM_VAR[PILEX[SOM_PILEX]];
                     CO = CO + 1;
                     break;
-                case 13:
+                case 13: //STOP
+                    break;
+                case 14: //ALLE
+                    CO = P_CODE[CO + 1];
+                    break;
+                case 15: //ALSN
+                    if (PILEX[SOM_PILEX] == 0){
+                        CO = P_CODE[CO + 1];
+                    }else{
+                        CO = CO + 2;
+                    }
+                    SOM_PILEX = SOM_PILEX - 1;
                     break;
             }
         }
     }
-
 
     public void CREER_FICHIER_CODE(String inputFileName) throws IOException {
         // Get the base name of the input file (i.e., without the ".mp" extension)

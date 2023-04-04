@@ -57,7 +57,7 @@ public class Compilateur {
 
     public void INITIALISER() throws IOException {
         NUM_LIGNE = 1;
-        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\PROG3.MP";
+        SOURCE = "C:\\Users\\Dang Dinh NGUYEN\\Documents\\L3_INFO\\S6\\ProjetCompilateur\\src\\PROG2.MP";
         try {
             bf = new BufferedReader(new FileReader(SOURCE));
             analyseurLexical = new AnalyseurLexical(this);
@@ -88,6 +88,7 @@ public class Compilateur {
         compilateur.analyseurSyntaxique.ANASYNT();
         compilateur.TERMINER();
         compilateur.interpreteur.CREER_FICHIER_CODE(compilateur.SOURCE);
+        //compilateur.interpreteur.AFFICHER_CODE_GEN();
         compilateur.interpreteur.INTERPRETER();
 
     }

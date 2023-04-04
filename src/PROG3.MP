@@ -1,6 +1,8 @@
 PROGRAMME test_condition;
 VAR resultat;
 DEBUT
+    ECRIRE('Entrez un nombre entier: ');
+    LIRE(resultat);
     SI resultat ALORS
     DEBUT
         ECRIRE('Le résultat est différent de zéro');
